@@ -15,9 +15,11 @@ concurrency:
 env:
   GCP_REGION: southamerica-west1
   CLOUD_RUN_SERVICE: landingagent
+  AR_REPO: cloud-run-source-deploy
+  IMAGE_NAME: landingagent
 
 jobs:
-  # ---------- Verificación rápida (lint + typecheck + build con Node) ----------
+  # ---------- Verificación (lint + typecheck + build con Node) ----------
   ci:
     name: Lint, typecheck & build
     runs-on: ubuntu-latest
@@ -51,12 +53,14 @@ jobs:
           path: dist
           retention-days: 7
 
-  # ---------- Deploy a Cloud Run (solo en push a main o tags) ----------
+  # ---------- Build imagen + Deploy a Cloud Run ----------
   deploy:
-    name: Deploy to Cloud Run
+    name: Build & Deploy to Cloud Run
     needs: ci
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -71,10 +75,34 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
+
+      - name: Set image path
+        id: img
+        run: |
+          IMAGE="${{ env.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.AR_REPO }}/${{ env.IMAGE_NAME }}"
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+
+      - name: Build Docker image with VITE_* baked in
+        run: |
+          docker build \
+            --progress=plain \
+            --build-arg VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL }}" \
+            --build-arg VITE_DASHBOARD_URL="${{ secrets.VITE_DASHBOARD_URL }}" \
+            --tag ${{ steps.img.outputs.image }}:${{ github.sha }} \
+            --tag ${{ steps.img.outputs.image }}:latest \
+            .
+
+      - name: Push image to Artifact Registry
+        run: |
+          docker push ${{ steps.img.outputs.image }}:${{ github.sha }}
+          docker push ${{ steps.img.outputs.image }}:latest
+
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.CLOUD_RUN_SERVICE }} \
-            --source . \
+            --image ${{ steps.img.outputs.image }}:${{ github.sha }} \
             --project ${{ secrets.GCP_PROJECT_ID }} \
             --region ${{ env.GCP_REGION }} \
             --platform managed \
@@ -94,5 +122,5 @@ jobs:
           echo "Deployed to: $URL"
           echo "### Deployed :rocket:" >> $GITHUB_STEP_SUMMARY
           echo "- Service: \`${{ env.CLOUD_RUN_SERVICE }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Region: \`${{ env.GCP_REGION }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Image: \`${{ steps.img.outputs.image }}:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- URL: $URL" >> $GITHUB_STEP_SUMMARY
