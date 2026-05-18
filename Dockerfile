@@ -9,6 +9,16 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci
 
+# Variables Vite (se embeben en el bundle en build-time)
+ARG VITE_API_BASE_URL
+ARG VITE_DASHBOARD_URL
+ARG VITE_POSTHOG_KEY
+ARG VITE_POSTHOG_HOST
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL \
+    VITE_DASHBOARD_URL=$VITE_DASHBOARD_URL \
+    VITE_POSTHOG_KEY=$VITE_POSTHOG_KEY \
+    VITE_POSTHOG_HOST=$VITE_POSTHOG_HOST
+
 # Copiar el resto del código y construir
 COPY . .
 RUN npm run build
