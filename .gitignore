@@ -49,3 +49,10 @@ coverage/
 
 # OS
 Thumbs.db
+
+# Secrets / credenciales (NUNCA commitear)
+gcp-key.json
+*-key.json
+*credentials*.json
+*.pem
+*.key

@@ -26,15 +26,17 @@ RUN npm run build
 # ---------- Stage 2: Serve ----------
 FROM nginx:1.27-alpine AS runner
 
-# Config personalizada para SPA (rutas client-side)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Plantilla nginx con ${PORT} (envsubst la procesa al arrancar)
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 
 # Copiar build estático desde la etapa anterior
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-EXPOSE 80
+# Cloud Run inyecta PORT=8080 por defecto; localmente usamos 8080 también
+ENV PORT=8080
+EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget -qO- http://localhost/ >/dev/null 2>&1 || exit 1
+  CMD wget -qO- http://localhost:${PORT}/ >/dev/null 2>&1 || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
