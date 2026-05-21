@@ -4,7 +4,7 @@ import { Menu, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 const WHATSAPP_URL =
-  "https://wa.me/59100000000?text=Hola%2C%20quiero%20saber%20m%C3%A1s%20sobre%20agente%C2%B7citas";
+  "https://wa.me/59169347415?text=Hola%2C%20quiero%20saber%20m%C3%A1s%20sobre%20agente%C2%B7citas";
 
 function WhatsAppIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -59,11 +59,10 @@ export function Nav() {
 
   return (
     <header
-      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-        scrolled || open
-          ? "border-b border-ink/10 bg-paper/85 backdrop-blur-md"
-          : "border-b border-transparent bg-transparent"
-      }`}
+      className={`fixed top-0 z-50 w-full transition-all duration-300 ${scrolled || open
+        ? "border-b border-ink/10 bg-paper/85 backdrop-blur-md"
+        : "border-b border-transparent bg-transparent"
+        }`}
     >
       <div className="container-edge flex h-16 items-center justify-between">
         <Link to="/" className="group flex items-center gap-2.5">
@@ -105,7 +104,7 @@ export function Nav() {
             WhatsApp
           </a>
           <a href="/registro" className="btn-ink !py-2 !text-sm">
-            Empezar gratis
+            Empezar
             <span aria-hidden>→</span>
           </a>
         </nav>
@@ -175,7 +174,7 @@ export function Nav() {
                 href="/registro"
                 className="btn-ink mt-3 !w-full !justify-center !py-3 !text-sm"
               >
-                Empezar gratis
+                Empezar
                 <span aria-hidden>→</span>
               </a>
             </nav>

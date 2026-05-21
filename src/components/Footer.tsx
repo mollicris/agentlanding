@@ -47,7 +47,7 @@ export function Footer() {
               href="/registro"
               className="mt-7 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper transition hover:bg-jade-700"
             >
-              Probar 14 días gratis
+              Registrar
               <span aria-hidden>→</span>
             </a>
 

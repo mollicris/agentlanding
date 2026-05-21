@@ -70,7 +70,7 @@ export function Hero() {
               className="mt-10 flex flex-wrap items-center gap-4"
             >
               <a href="/registro" className="btn-ink !px-7 !py-3.5 !text-base">
-                Probar gratis 14 días
+                Resgistrar
                 <span aria-hidden>→</span>
               </a>
             </motion.div>
